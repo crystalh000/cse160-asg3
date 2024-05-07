@@ -26,6 +26,7 @@ var FSHADER_SOURCE =`
   varying vec2 v_UV;
   uniform vec4 u_FragColor;
   uniform sampler2D u_Sampler0;
+  uniform sampler2D u_Sampler1;
   uniform int u_whichTexture;
   void main() {
     if (u_whichTexture == -2) {
@@ -34,7 +35,10 @@ var FSHADER_SOURCE =`
         gl_FragColor = vec4(v_UV, 1.0, 1.0); // use UV debug color
     }else if (u_whichTexture == 0) {
         gl_FragColor = texture2D(u_Sampler0, v_UV); // use texture0
-    } else {
+    } else if (u_whichTexture == 1) {
+        gl_FragColor = texture2D(u_Sampler1, v_UV); // use texture1
+    }
+    else {
         gl_FragColor = vec4(1,0.2,0.2,1); // error, put redish
     }
   }`
@@ -51,6 +55,7 @@ let u_ViewMatrix;
 let u_ProjectionMatrix;
 let u_GlobalRotateMatrix;
 let u_Sampler0;
+let u_Sampler1;
 
 
 let g_yellowAngle = 0;
@@ -166,6 +171,13 @@ function connectVariablesToGLSL() {
      return;
    }
 
+   // get the storage location of u_Sampler
+   u_Sampler1 = gl.getUniformLocation(gl.program, 'u_Sampler1');
+   if (!u_Sampler1) {
+     console.log('Failed to get the storage location of u_Sampler1');
+     return;
+   }
+
    u_whichTexture = gl.getUniformLocation(gl.program, 'u_whichTexture');
     if (!u_whichTexture) {  
         console.log('Failed to get the storage location of u_whichTexture');
@@ -212,7 +224,7 @@ function addActionsForHTMLUI() {
   
 }
 
-function initTextures(gl, n) {
+function initTextures(gl,n) {
     var image = new Image();  // Create the image object
     if (!image) {
       console.log('Failed to create the image object');
@@ -223,6 +235,14 @@ function initTextures(gl, n) {
     image.src = '../lib/sky.jpg';
 
     // add more textures loading
+    var image1 = new Image();
+    if (!image1) {
+      console.log('Failed to create the image object');
+      return false;
+    }
+    // Register the event handler to be called on loading an image
+    image1.onload = function(){ sendImageToTEXTURE1(image1); };
+    image1.src = "../lib/grass.jpg";
     return true;
 }
 
@@ -244,6 +264,22 @@ function sendImageToTEXTURE0(image) {
 
 }
 
+function sendImageToTEXTURE1(image) {
+    var texture = gl.createTexture();   // Create a texture object
+    if (!texture) {
+      console.log('Failed to create the texture object');
+      return false;
+    }
+
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y axis
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+    gl.uniform1i(u_Sampler1, 1);
+    console.log('finished loadTexture1');
+}
+
 function main() {
   // Set up canvas and get gl variables
   setUpWebGL();
@@ -254,7 +290,10 @@ function main() {
   // Set up actions for the HTML UI Elements
   addActionsForHTMLUI();
 
-  initTextures(0);
+  // for keyboard input
+  document.onkeydown = keydown;
+
+  initTextures();
 
   // rotation of animal using mouse
 //   canvas.addEventListener('mousemove', function(event) {
@@ -408,6 +447,18 @@ function updateAnimationAngles() {
   
 }
 
+function keydown(ev) {
+  if (ev.keyCode == 39) { // The right arrow key was pressed
+    g_eye[0] += 0.2;
+  } 
+  else if (ev.keyCode == 37) {
+    g_eye[0] -= 0.2;
+  }
+  // Redraw the scene
+  renderAllShapes();
+  console.log(ev.keyCode);
+}
+
 var g_eye = [0,0,3];
 var g_at = [0,0,-100];
 var g_up = [0,1,0];
@@ -435,9 +486,17 @@ gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
 
   gl.clear(gl.COLOR_BUFFER_BIT);
 
-  // draw a test triangle
-  // drawTriangle3D([-1.0,0.0,0.0, -0.5, -1.0, 0.0, 0.0, 0.0, 0.0]);
+  // draw the floor 
+  var floor = new Cube();
+  floor.color = [1.0, 0.0, 0.0, 1.0];
+  floor.textureNum = 1;
+  floor.matrix.translate(0,-0.75,0.0);
+  floor.matrix.scale(10,0,10);
+  floor.matrix.translate(-0.5,0,-0.5);
+  floor.render();
 
+
+  
   // draw the body cube
   // body.color = [1.0, 0.0, 0.0, 1.0];
   body = new Cube();

@@ -1,3 +1,5 @@
+// used ChatGPT to get the following
+
 class Cone {
     constructor(radius, height, segments) {
         if (radius <= 0 || height <= 0 || segments < 3) {
