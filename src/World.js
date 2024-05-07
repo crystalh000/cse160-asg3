@@ -232,7 +232,7 @@ function initTextures(gl,n) {
     }
     // Register the event handler to be called on loading an image
     image.onload = function(){ sendImageToTEXTURE0(image); };
-    image.src = '../lib/sky.jpg';
+    image.src = '../lib/fur.jpg';
 
     // add more textures loading
     var image1 = new Image();
@@ -242,7 +242,7 @@ function initTextures(gl,n) {
     }
     // Register the event handler to be called on loading an image
     image1.onload = function(){ sendImageToTEXTURE1(image1); };
-    image1.src = "../lib/grass.jpg";
+    image1.src = "../lib/grass1.jpg";
     return true;
 }
 
@@ -296,26 +296,26 @@ function main() {
   initTextures();
 
   // rotation of animal using mouse
-//   canvas.addEventListener('mousemove', function(event) {
-//     var rect = canvas.getBoundingClientRect();
-//     var x = event.clientX - rect.left;
-//     var y = event.clientY - rect.top;
+  canvas.addEventListener('mousemove', function(event) {
+    var rect = canvas.getBoundingClientRect();
+    var x = event.clientX - rect.left;
+    var y = event.clientY - rect.top;
 
-//     // Map the x and y positions to rotation angles
-//     g_globalAngle = (x / canvas.width) * 360; // Map x from [0, width] to [0, 360]
+    // Map the x and y positions to rotation angles
+    g_globalAngle = (x / canvas.width) * 360; // Map x from [0, width] to [0, 360]
 
-//     // Redraw the scene
-//     renderAllShapes();
-//   });
+    // Redraw the scene
+    renderAllShapes();
+  });
 
-//   canvas.addEventListener('mousedown', function(event) {
-//     if(event.shiftKey) {
-//         // The shift key was held down during the click
-//         // Start the 'poke' animation
-//         g_pokeAnimation = true;
-//         //console.log("Poke animation started");
-//     }
-//   });
+  canvas.addEventListener('mousedown', function(event) {
+    if(event.shiftKey) {
+        // The shift key was held down during the click
+        // Start the 'poke' animation
+        g_pokeAnimation = true;
+        //console.log("Poke animation started");
+    }
+  });
     // Specify the color for clearing <canvas>
     // gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clearColor(30/255, 130/255, 76/255, 1.0); // make background green
