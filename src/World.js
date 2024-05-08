@@ -27,6 +27,7 @@ var FSHADER_SOURCE =`
   uniform vec4 u_FragColor;
   uniform sampler2D u_Sampler0;
   uniform sampler2D u_Sampler1;
+  uniform sampler2D u_Sampler2;
   uniform int u_whichTexture;
   void main() {
     if (u_whichTexture == -2) {
@@ -37,6 +38,8 @@ var FSHADER_SOURCE =`
         gl_FragColor = texture2D(u_Sampler0, v_UV); // use texture0
     } else if (u_whichTexture == 1) {
         gl_FragColor = texture2D(u_Sampler1, v_UV); // use texture1
+    } else if (u_whichTexture == 2) {
+        gl_FragColor = texture2D(u_Sampler2, v_UV); // use texture2 for sky
     }
     else {
         gl_FragColor = vec4(1,0.2,0.2,1); // error, put redish
@@ -178,14 +181,18 @@ function connectVariablesToGLSL() {
      return;
    }
 
+   u_Sampler2 = gl.getUniformLocation(gl.program, 'u_Sampler2');
+   if (!u_Sampler2) {
+     console.log('Failed to get the storage location of u_Sampler2');
+     return;
+   }
+
    u_whichTexture = gl.getUniformLocation(gl.program, 'u_whichTexture');
     if (!u_whichTexture) {  
         console.log('Failed to get the storage location of u_whichTexture');
         return;
     }
    
-
-  
   var identityM = new Matrix4();
   gl.uniformMatrix4fv(u_ModelMatrix, false, identityM.elements);
 //   gl.uniformMatrix4fv(u_ViewMatrix, false, identityM.elements);
@@ -243,6 +250,17 @@ function initTextures(gl,n) {
     // Register the event handler to be called on loading an image
     image1.onload = function(){ sendImageToTEXTURE1(image1); };
     image1.src = "../lib/grass1.jpg";
+
+
+    var image2 = new Image();
+    if (!image2) {
+      console.log('Failed to create the image object');
+      return false;
+    }
+    // Register the event handler to be called on loading an image
+    image2.onload = function(){ sendImageToTEXTURE2(image2); };
+    image2.src = "../lib/sky1.jpg";
+
     return true;
 }
 
@@ -278,6 +296,22 @@ function sendImageToTEXTURE1(image) {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
     gl.uniform1i(u_Sampler1, 1);
     console.log('finished loadTexture1');
+}
+
+function sendImageToTEXTURE2(image) {
+    var texture = gl.createTexture();   // Create a texture object
+    if (!texture) {
+      console.log('Failed to create the texture object');
+      return false;
+    }
+
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y axis
+    gl.activeTexture(gl.TEXTURE2);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+    gl.uniform1i(u_Sampler2, 2);
+    console.log('finished loadTexture2');
 }
 
 function main() {
@@ -469,7 +503,8 @@ function renderAllShapes() {
 
   // makes viewing the blocks possible
   var projMat = new Matrix4();
-  projMat.setPerspective(50, 1*canvas.width/canvas.height, 1, 100);
+//   projMat.setPerspective(50, 1*canvas.width/canvas.height, 1, 100);
+  projMat.setPerspective(50, 1*canvas.width/canvas.height, 0.1, 50); // Near plane is 0.1, far plane is 50
   gl.uniformMatrix4fv(u_ProjectionMatrix, false, projMat.elements);
   
   var viewMat = new Matrix4();
@@ -496,7 +531,15 @@ gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
   floor.render();
 
 
-  
+  // draw the sky 
+  var sky = new Cube();
+  sky.color = [1.0,0.0,0.0,1.0];
+  sky.textureNum = 2;
+  sky.matrix.scale(25,25,25);
+  sky.matrix.translate(-0.5,-0.5,-0.5);
+  sky.render();
+
+
   // draw the body cube
   // body.color = [1.0, 0.0, 0.0, 1.0];
   body = new Cube();
@@ -514,13 +557,13 @@ gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
   footR.matrix.translate(0.15,-0.7 + g_jumpHeight,0.15); 
 
   // Move the foot up by the lift amount
-  footR.matrix.translate(0, g_footLiftR, 0);
+  footR.matrix.translate(0, g_footLiftR, 0.01);
 
   // Rotate the foot
   footR.matrix.rotate(g_footAngleR, 1, 0, 0);
 
   // Scale the foot
-  footR.matrix.scale(0.1,0.18,0.15);
+  footR.matrix.scale(0.08,0.17,0.1);
 
   // Render the foot
   footR.render();
@@ -531,16 +574,18 @@ gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
   footL.matrix.translate(-0.25,-0.7 + g_jumpHeight,0.15); 
 
   // Move the foot up by the lift amount
-  footL.matrix.translate(0, g_footLiftL, 0);
+  footL.matrix.translate(0, g_footLiftL, 0.01);
 
   // Rotate the foot
   footL.matrix.rotate(g_footAngleL, 1, 0, 0);
 
   // Scale the foot
-  footL.matrix.scale(0.1,0.18,0.15);
+  footL.matrix.scale(0.08,0.17,0.1);
 
   // Render the foot
   footL.render();
+
+
 
   // left arm
   var armL = new Cube();
