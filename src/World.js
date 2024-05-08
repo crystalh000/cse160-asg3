@@ -497,6 +497,36 @@ var g_eye = [0,0,3];
 var g_at = [0,0,-100];
 var g_up = [0,1,0];
 
+// var g_camera = new Camera();
+var g_map = [
+    [1,1,1,1,1,1,1,1],
+    [1,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,1],
+    [1,0,0,1,1,0,0,1],
+    [1,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,1],
+    [1,0,0,0,1,0,0,1],
+    [1,0,0,0,0,0,0,1]
+];
+
+function drawMap() {
+    for(x=0; x < 16; x++) {
+        for (y=0; y < 16; y++) {
+            if (x == 0 || x == 31 || y == 0 || y == 31) {
+                var body = new Cube();
+                body.color = [0.8, 1.0, 1.0, 1.0];
+                body.matrix.translate(0,-0.75,0);
+                body.matrix.scale(0.3,0.3,0.3);
+                body.matrix.translate(x-16,0,y-16);
+                body.render();
+            }
+        }
+    }
+}
+
+
+
+
 function renderAllShapes() {
   // Check the time at the start of the function
   var startTime = performance.now();
