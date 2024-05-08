@@ -110,8 +110,8 @@ function setUpWebGL() {
   //  gl.depthFunc(gl.LEQUAL);
 
   //  // Clear the depth buffer
-  //  gl.clearDepth(1.0);
-  //  gl.clear(gl.DEPTH_BUFFER_BIT);
+//    gl.clearDepth(1.0);
+   gl.clear(gl.DEPTH_BUFFER_BIT);
 
 }
 
@@ -497,7 +497,7 @@ var g_eye = [0,0,3];
 var g_at = [0,0,-100];
 var g_up = [0,1,0];
 
-// var g_camera = new Camera();
+var g_camera = new Camera();
 var g_map = [
     [1,1,1,1,1,1,1,1],
     [1,0,0,0,0,0,0,1],
@@ -523,9 +523,6 @@ function drawMap() {
         }
     }
 }
-
-
-
 
 function renderAllShapes() {
   // Check the time at the start of the function
@@ -575,7 +572,7 @@ gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
   body = new Cube();
   body.color = [251/255, 231/255, 239/255, 1.0];
   body.textureNum = 0;
-  body.matrix.translate(-0.25, -0.75 + 0.2 + g_jumpHeight , 0.0);
+  body.matrix.translate(-0.25+0.0001, -0.75 + 0.2 + g_jumpHeight , 0.0);
   body.matrix.rotate(g_bodyAngle, 0, 0, 1);
   var bodyCoordinatesMat=new Matrix4(body.matrix);
   body.matrix.scale(0.5, 0.5, 0.5); // Adjusted scale to be the same in all dimensions
@@ -584,7 +581,7 @@ gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
   // right foot
   var footR = new Cube();
   footR.color = [251/255, 231/255, 239/255, 1.0];
-  footR.matrix.translate(0.15,-0.7 + g_jumpHeight,0.15); 
+  footR.matrix.translate(0.15,-0.7 + g_jumpHeight,0.16); 
 
   // Move the foot up by the lift amount
   footR.matrix.translate(0, g_footLiftR, 0.01);
@@ -601,7 +598,7 @@ gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
   // Left foot
   var footL = new Cube();
   footL.color = [251/255, 231/255, 239/255, 1.0];
-  footL.matrix.translate(-0.25,-0.7 + g_jumpHeight,0.15); 
+  footL.matrix.translate(-0.2,-0.7 + g_jumpHeight,0.15); 
 
   // Move the foot up by the lift amount
   footL.matrix.translate(0, g_footLiftL, 0.01);
@@ -663,7 +660,7 @@ gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
   // yellow.color = [1,1,0,1];
   tail.color = [250/255,248/255,246/255, 1.0];
   tail.matrix.set(bodyCoordinatesMat); // Start with the same transformation matrix as the head
-  tail.matrix.translate(0.15,0.1,0.5);
+  tail.matrix.translate(0.195,0.1,0.5);
   // yellow.matrix.rotate(-5,1,0,0); // rotate the arm
   tail.matrix.scale(0.1,0.1,0.1);
   tail.render();
